@@ -17,6 +17,8 @@ def test_fnews():
         assert len(f_n.full_html) == f.tell()
         stack.append("filter_news gethtml")
         f_n.MyParser().feed(f_n.full_html)
+        assert f_n.MyParser().model["pos"] == 0
+        stack.append("filter_news model empty")
     except:
         raise 
     finally:
