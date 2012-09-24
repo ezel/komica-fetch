@@ -1,21 +1,11 @@
 # filter HTML in news
 # div#contents > form
 
-# TODO override the self.model to a class
+# TODO: override the self.model to a class
 
 from HTMLParser import HTMLParser
 
 full_html = ""
-
-def getSrcUrl(pic):
-    prefix = "http://2cat.or.tl/~tedc21thc/new/src/"
-    return prefix + pic
-
-def getThumbUrl(pic):
-    prefix = "http://2cat.or.tl/~tedc21thc/new/thumb/"
-    tmpl = pic.split('.')
-    return "%s%ss.%s" % (prefix, tmpl[0], tmpl[1])
-    
 
 class MyParser(HTMLParser):
     """ 
@@ -30,9 +20,9 @@ class MyParser(HTMLParser):
         return basename.replace('s','',1);
     
     @staticmethod
-    def formatOutput(result):
+    def debug(result):
         for i in range(len(result)):
-            print i
+            print "%d: len %d" %(i, len(result[i]))
             for j in range(len(result[i])):
                 print "%d:%s" % (j,result[i][j])
     

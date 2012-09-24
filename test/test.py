@@ -9,7 +9,15 @@ stack = []
 
 def test_fetch_page():
     validres = 633080
+    validpic = "1348070226409.jpg"
     import fetch as fp
+    
+    assert fp.__validRid(123456) == "123456"
+    assert fp.__validRid('123456') == "123456"
+    assert fp.__validRid('rasd123456') == "123456"
+    assert fp.__validRid('r127asd123456') == "127123"
+    assert fp.__validRid('r127asd16') == False
+    stack.append("fetch_page can check rid format")
     
     res = fp.__getRes(validres, fp.news)
     try:
@@ -21,9 +29,13 @@ def test_fetch_page():
     assert fp.__getHtml(validres, fp.news)
     stack.append("fetch_page get html")
     
-def test_run():
-    pass
+    imgid = validpic
+    assert ('content-type','image/jpeg') in fp.__getRes(False, fp.__getThumbUrl(imgid)).getheaders()
+    assert ('content-type','image/jpeg') in fp.__getRes(False, fp.__getSrcUrl(imgid)).getheaders()
+    stack.append("fetch_page get img res")
     
+def test_run():
+    import runner
     
 def test_fnews():
     import filter_content as f_n
@@ -52,7 +64,7 @@ def test_fnews():
         assert len(f_p.result) == len(f_p._listRes)
         stack.append("filter_news output generate result")
         
-        #f_p.formatOutput(out)
+        #f_p.debug(out)
         
     except:
         raise 
@@ -65,7 +77,7 @@ def unitmain():
         test_fnews()
         test_fetch_page()
         
-        test_run()
+        #test_run()
     except:
         print bad_f_n
         print "The passed: \n\t%s " % "\n\t".join(stack)
