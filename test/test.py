@@ -7,7 +7,7 @@ bad_f_n = "filter_news not pass"
 stack = []
 
 def test_fnews():
-    import filter_news as f_n
+    import filter as f_n
     f = open("sample.html")
     try:
         assert f_n.full_html == ''
@@ -16,9 +16,18 @@ def test_fnews():
         f.seek(0, 2)
         assert len(f_n.full_html) == f.tell()
         stack.append("filter_news gethtml")
-        f_n.MyParser().feed(f_n.full_html)
-        assert f_n.MyParser().model["pos"] == 0
+        f_p = f_n.MyParser()
+        out = f_p.output()
+        assert f_p.model["pos"] == 0
         stack.append("filter_news model empty")
+        #stack.append("%d == %d" %( len(f_p._listRes), f_p._resCount))
+        assert len(f_p._listRes) == f_p._resCount
+        stack.append("filter_news output store result")
+        assert len(f_p.result) == len(f_p._listRes)
+        stack.append("filter_news output generate result")
+        
+        f_p.formatOutput(out)
+        
     except:
         raise 
     finally:

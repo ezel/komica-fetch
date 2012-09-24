@@ -1,7 +1,7 @@
 # filter HTML in news
 # div#contents > form
 
-# TODO override the self.model
+# TODO override the self.model to a class
 
 from HTMLParser import HTMLParser
 
@@ -20,7 +20,7 @@ def getThumb(pic):
 class MyParser(HTMLParser):
     """ 
     The class will parser a full_html string into a tuple list,
-    like (id, quote, pic_id)     # pic_id may be None
+    like (id, pic_id, quote)     # pic_id may be None
     use output method to generate the tuple list
     """
     
@@ -28,7 +28,13 @@ class MyParser(HTMLParser):
     def getPicIdFromTURL(url):
         basename = url.split('/')[-1]
         return basename.replace('s','',1);
-        pass
+    
+    @staticmethod
+    def formatOutput(result):
+        for i in range(len(result)):
+            print i
+            for j in range(len(result[i])):
+                print "%d:%s" % (j,result[i][j])
     
     def reset(self):
         # the stacklist save the (pushCon, handleTag, popCon, handleData) functions
@@ -40,6 +46,7 @@ class MyParser(HTMLParser):
         self.result = []
         self._listRes = []
         self._eachRes =[]
+        self._eachDate = []
         self._resCount = 0
         
         # set up the callback?
@@ -62,7 +69,7 @@ class MyParser(HTMLParser):
             (lambda *parg: False,
              None,
              lambda *parg: parg[0] == "div" and 2,
-             lambda *parg: "q<%s>"% parg[0]))
+             lambda *parg: parg))
         
         # print 'reset called'
         HTMLParser.reset(self)
@@ -80,7 +87,17 @@ class MyParser(HTMLParser):
         if handle is not None:
             val = handle(tag, attrs)
             if len(val):
-                print val 
+                if type(val) == type([]):
+                    if self._eachRes:
+                        if self._eachDate:
+                            self._eachRes.append("".join(self._eachDate))
+                        self._listRes.append(self._eachRes)
+                        self._resCount += 1
+                    self._eachRes = val
+                    self._eachDate = []
+                elif type(val) == type('str'):
+                    self._eachRes.append(val)
+                    #print "append %s to _list" % self._eachRes
         
     def handle_endtag(self, tag):
         # pop stack
@@ -97,11 +114,17 @@ class MyParser(HTMLParser):
         if handle is not None:
             val = handle(data)
             if len(val):
-                print val
+                """
+                if self._eachDate:
+                    self._eachDate.append("\n")
+                """
+                self._eachDate.append(val[0])
             
     def output(self):
-        if len(self.result) == 0:
-            self.result = [1,2,3]
+        self.feed(full_html)
+        # update the result if need
+        if len(self.result) != self._resCount:
+            self.result = [tuple(l) for l in self._listRes]
         return self.result
 
 def gethtml(type):
@@ -114,8 +137,12 @@ def gethtml(type):
             full_html = f.read()
         finally:
             f.close()
+            
+def sethtml(str):
+    global full_html
+    full_html = str
 
-def main():
-    gethtml()
+def main_flow():
+    gethtml() # or sethtml
     kparser = MyParser()
-    kparser.feed(full_html)
+    kparser.output()
