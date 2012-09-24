@@ -11,7 +11,7 @@ def getSrcUrl(pic):
     prefix = "http://2cat.or.tl/~tedc21thc/new/src/"
     return prefix + pic
 
-def getThumb(pic):
+def getThumbUrl(pic):
     prefix = "http://2cat.or.tl/~tedc21thc/new/thumb/"
     tmpl = pic.split('.')
     return "%s%ss.%s" % (prefix, tmpl[0], tmpl[1])
@@ -51,6 +51,7 @@ class MyParser(HTMLParser):
         
         # set up the callback?
         self.model["stack"].append(
+            #(lambda *parg: parg[0] == "div" and ('id', 'contents') in parg[1], None, lambda *parg: False, None))
             (lambda *parg: parg[0] == "div" and ('class', 'threadpost') in parg[1], None, lambda *parg: False, None))
         
         self.model["stack"].append(
@@ -127,7 +128,7 @@ class MyParser(HTMLParser):
             self.result = [tuple(l) for l in self._listRes]
         return self.result
 
-def gethtml(type):
+def __gethtml(type):
     """ Save the page in the string of full_html """
     global full_html 
     if type == 1:
@@ -142,7 +143,12 @@ def sethtml(str):
     global full_html
     full_html = str
 
-def main_flow():
-    gethtml() # or sethtml
+"""
+the main flow:
+
+def main(data):
+    # gethtml() or sethtml
+    sethtml(data)
     kparser = MyParser()
-    kparser.output()
+    return kparser.output()
+"""
