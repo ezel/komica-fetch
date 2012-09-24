@@ -1,12 +1,13 @@
-# control the main flowwork
+#!/usr/bin/env python
 
 import fetch
 import filter_content
 import os
 
+save_path ="./save"
 # check save path
-if not os.path.exists('save'):
-    os.mkdir('save')
+if not os.path.exists(save_path):
+    os.mkdir(save_path)
     
 def save_from_fetch(*fetch_params):
     data = (fetch.img(*fetch_params))
@@ -17,10 +18,10 @@ def save_from_fetch(*fetch_params):
         finally:
             img.close()
     
-    
-if __name__ == "__main__":
+def main():
     # get html page
-    data = fetch.page(debug=True)
+    #data = fetch.page(debug=True)
+    data = fetch.page()
     
     print "Need download all the available image?"
     save_src = raw_input('>[n]')
@@ -62,3 +63,9 @@ if __name__ == "__main__":
                     else:
                         p.close()
                         
+
+if __name__ == "__main__":
+    try:
+        main()
+    except (EOFError, KeyboardInterrupt):
+        pass
