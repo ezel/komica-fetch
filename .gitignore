@@ -1,5 +1,8 @@
 *.pyc
 save/*
+ 
 *.[jJ][pP][gG]
 *.[pP][nN][gG]
 *.[gG][iI][fF]
+
+.#*
