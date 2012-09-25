@@ -11,8 +11,8 @@ bad_m = "model not pass"
 stack = []
 
 def test_model():
-    from model import model
-    m = model()
+    import model
+    m = model.model()
     
     pos = m.__dict__["pos"]
     assert m.__dict__["pos"] == 0
@@ -68,6 +68,10 @@ def test_model():
     assert m.getHandleData() == f4
     stack.append("\tmodel get handle test 2")
     
+    ms = model.setup()
+    type(ms[0]) == model.model
+    stack.append("\tmodel setup")
+    
 def test_fetch_page():
     validres = 633080
     validpic = "1348070226409.jpg"
@@ -100,9 +104,12 @@ def test_run():
     
 def test_fnews():
     import filter_content as f_n
+    import model
     f = open("sample.html")
     try:
         assert f_n.full_html == ''
+        assert type(f_n.models) == list
+        assert type(f_n.models[0]) == type(model.model)
         stack.append("\tfilter_news init pass")
         
         f_n.sethtml("abcdefg1234567")
@@ -116,7 +123,7 @@ def test_fnews():
         
         f_p = f_n.MyParser()
         out = f_p.output()
-        assert f_p.model["pos"] == 0
+        assert type(f_p.model) == type(model.model)
         stack.append("\tfilter_news model empty")
         #stack.append("%d == %d" %( len(f_p._listRes), f_p._resCount))
         
