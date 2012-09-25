@@ -17,10 +17,56 @@ def test_model():
     pos = m.__dict__["pos"]
     assert m.__dict__["pos"] == 0
     m.next();
-    assert m.__dict__["pos"] == 1
+    assert m.__dict__["pos"] == 0
     m.prev()
     assert m.__dict__["pos"] == 0
-    stack.append("model init")
+    m.prev()
+    assert m.__dict__["pos"] == 0
+    assert m.getHandleData() == None
+    assert m.getHandleTag() == None
+    stack.append("\tmodel init")
+    
+    f1, f2 = lambda: 1,lambda: 2
+    f3, f4 = lambda: 3,lambda: 4
+    m.push(f1)
+    assert m.__dict__["stack"][0] == (f1,)
+    m.push(f2, f1)
+    assert m.__dict__["stack"][1] == (f2, f1)
+    m.push(f1, f2, f3)
+    assert m.__dict__["stack"][2] == (f1, f2, f3)
+    m.push(f1, f2, f3, f4)
+    assert m.__dict__["stack"][3] == (f1, f2, f3, f4)
+    stack.append("\tmodel push works")
+    
+    m.next()
+    assert m.__dict__["pos"] == 1
+    assert m.getHandleData() == None
+    assert m.getHandleTag() == None
+    stack.append("\tmodel get handle test 1") 
+    
+    m.next()
+    assert m.__dict__["pos"] == 3
+    stack.append("\tmodel next test 1")
+    m.prev()
+    assert m.__dict__["pos"] == 1
+    stack.append("\tmodel prev test 1")
+    
+    m.next(); m.next()
+    assert m.__dict__["pos"] == 4
+    stack.append("\tmodel next test 2")
+    m.prev(); m.prev()
+    assert m.__dict__["pos"] == 4
+    m.push(f1, f1, f1, f1)
+    assert len(m.__dict__["stack"]) == 5
+    m.prev(); m.prev()
+    assert m.__dict__["pos"] == 1
+    stack.append("\tmodel prev test 2")
+    
+    m.next()
+    assert m.__dict__["pos"] == 3
+    assert m.getHandleTag() == f3
+    assert m.getHandleData() == f4
+    stack.append("\tmodel get handle test 2")
     
 def test_fetch_page():
     validres = 633080
@@ -57,30 +103,29 @@ def test_fnews():
     f = open("sample.html")
     try:
         assert f_n.full_html == ''
-        stack.append("filter_news init pass")
+        stack.append("\tfilter_news init pass")
         
         f_n.sethtml("abcdefg1234567")
         assert f_n.full_html == "abcdefg1234567"
-        stack.append("filter_news sethtml ok!")
+        stack.append("\tfilter_news sethtml ok!")
         
         f_n.__gethtml(1)
         f.seek(0, 2)
         assert len(f_n.full_html) == f.tell()
-        stack.append("filter_news gethtml")
+        stack.append("\tfilter_news gethtml")
         
         f_p = f_n.MyParser()
         out = f_p.output()
         assert f_p.model["pos"] == 0
-        stack.append("filter_news model empty")
+        stack.append("\tfilter_news model empty")
         #stack.append("%d == %d" %( len(f_p._listRes), f_p._resCount))
         
         assert len(f_p._listRes) == f_p._resCount
-        stack.append("filter_news output store result")
+        stack.append("\tfilter_news output store result")
         assert len(f_p.result) == len(f_p._listRes)
-        stack.append("filter_news output generate result")
+        stack.append("\tfilter_news output generate result")
         
         #f_p.debug(out)
-        
     except:
         raise 
     finally:
@@ -90,7 +135,9 @@ def unitmain():
     
     try:
         test_fnews()
+        stack.append("filter_news all passed")
         #test_fetch_page()
+        stack.append("fetch_page all passed")
         test_model()
         
         #test_run()
