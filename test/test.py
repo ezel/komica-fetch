@@ -109,7 +109,6 @@ def test_fnews():
     try:
         assert f_n.full_html == ''
         assert type(f_n.models) == list
-        assert type(f_n.models[0]) == type(model.model)
         stack.append("\tfilter_news init pass")
         
         f_n.sethtml("abcdefg1234567")
@@ -123,7 +122,6 @@ def test_fnews():
         
         f_p = f_n.MyParser()
         out = f_p.output()
-        assert type(f_p.model) == type(model.model)
         stack.append("\tfilter_news model empty")
         #stack.append("%d == %d" %( len(f_p._listRes), f_p._resCount))
         
@@ -131,8 +129,8 @@ def test_fnews():
         stack.append("\tfilter_news output store result")
         assert len(f_p.result) == len(f_p._listRes)
         stack.append("\tfilter_news output generate result")
+        f_p.debug(out)
         
-        #f_p.debug(out)
     except:
         raise 
     finally:
@@ -146,6 +144,7 @@ def unitmain():
         #test_fetch_page()
         stack.append("fetch_page all passed")
         test_model()
+        stack.append("model all passed")
         
         #test_run()
     except:
