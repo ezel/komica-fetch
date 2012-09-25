@@ -1,12 +1,27 @@
+# just write easy tests which only used the built-in functions ...
+
 import sys
 sys.path.append("..")
 
 # the unpass string warning
 bad_f_n = "filter_news not pass"
 bad_f_p = "filter_news not pass"
+bad_m = "model not pass"
 
 stack = []
 
+def test_model():
+    from model import model
+    m = model()
+    
+    pos = m.__dict__["pos"]
+    assert m.__dict__["pos"] == 0
+    m.next();
+    assert m.__dict__["pos"] == 1
+    m.prev()
+    assert m.__dict__["pos"] == 0
+    stack.append("model init")
+    
 def test_fetch_page():
     validres = 633080
     validpic = "1348070226409.jpg"
@@ -75,7 +90,8 @@ def unitmain():
     
     try:
         test_fnews()
-        test_fetch_page()
+        #test_fetch_page()
+        test_model()
         
         #test_run()
     except:

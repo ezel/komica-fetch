@@ -12,7 +12,7 @@ if not os.path.exists(save_path):
 def save_from_fetch(*fetch_params):
     data = (fetch.img(*fetch_params))
     if data:
-        img = open("./save/" + post[1], "w")
+        img = open("./save/" + fetch_params[0], "w")
         try:
             img.write(data)
         finally:
