@@ -1,11 +1,40 @@
 # filter HTML in news
 # div#contents > form
 
-# TODO: override the self.model to a class
-
 from HTMLParser import HTMLParser
 
+def setup():
+    import model
+    models =[] 
+    tmpM = model.model()
+    # funcs: (nextCond, prevCond, handleTag, handleData)
+    tmpM.push(
+        lambda *parg: parg[0] == "div" and ('class', 'threadpost') in parg[1], None, None, None)
+    
+    tmpM.push(
+        lambda *parg: parg[0] == "img" and 1 or ( (parg[0]=="div" and ('class','quote') in parg[1]) and 2),
+        lambda *parg: parg[0] == "hr",
+        lambda *parg: [v for k,v in parg[1] if k == "id" and ( ('class', 'threadpost') in parg[1] or ('class', 'reply') in parg[1])], 
+        None)
+    
+    tmpM.push(
+        None,
+        lambda *parg: parg[0] == "img",
+        lambda *parg: apply(MyParser.getPicIdFromTURL, [v for k, v in parg[1] if k=="src"]),
+        None)
+    
+    tmpM.push(
+        None,
+        lambda *parg: parg[0] == "div" and 2,
+        None,
+        lambda *parg: parg)
+    
+    models.append(tmpM)
+    
+    return models
+
 full_html = ""
+models = setup()
 
 class MyParser(HTMLParser):
     """ 
@@ -26,10 +55,8 @@ class MyParser(HTMLParser):
             for j in range(len(result[i])):
                 print "%d:%s" % (j,result[i][j])
     
-    def reset(self):
-        # the stacklist save the (pushCon, handleTag, popCon, handleData) functions
-        # the return value of pushCon/popCon can be set to a number
-        self.model = {"pos":0,"stack":[]}
+    def __init__(self, modelval=models[0]):
+        self.model = models[0]
         
         # save the tuple (id, quote, pic_id) in result 
         # the pic_id may be null
@@ -38,43 +65,14 @@ class MyParser(HTMLParser):
         self._eachRes =[]
         self._eachDate = []
         self._resCount = 0
-        
-        # set up the callback?
-        self.model["stack"].append(
-            #(lambda *parg: parg[0] == "div" and ('id', 'contents') in parg[1], None, lambda *parg: False, None))
-            (lambda *parg: parg[0] == "div" and ('class', 'threadpost') in parg[1], None, lambda *parg: False, None))
-        
-        self.model["stack"].append(
-            (lambda *parg: parg[0] == "img" and 1 or ( (parg[0]=="div" and ('class','quote') in parg[1]) and 2),
-             lambda *parg: [v for k,v in parg[1] if k == "id" and ( ('class', 'threadpost') in parg[1] or ('class', 'reply') in parg[1])], 
-             lambda *parg: parg[0] == "hr",
-             None))
-        
-        self.model["stack"].append(
-            (lambda *parg: False,
-             lambda *parg: apply(self.getPicIdFromTURL, [v for k, v in parg[1] if k=="src"]),
-             lambda *parg: parg[0] == "img",
-             None))
-        
-        self.model["stack"].append(
-            (lambda *parg: False,
-             None,
-             lambda *parg: parg[0] == "div" and 2,
-             lambda *parg: parg))
-        
-        # print 'reset called'
-        HTMLParser.reset(self)
+       
+        HTMLParser.__init__(self)
     
     def handle_starttag(self, tag, attrs):
         # push stack
-        check = self.model["stack"][self.model["pos"]][0](tag, attrs)
-        if check:
-            if type(check) == type(1):
-                self.model["pos"] += check
-            else:
-                self.model["pos"] += 1
+        self.model.next(tag, attrs)
             
-        handle = self.model["stack"][self.model["pos"]][1]
+        handle = self.model.getHandleTag()
         if handle is not None:
             val = handle(tag, attrs)
             if len(val):
@@ -88,27 +86,16 @@ class MyParser(HTMLParser):
                     self._eachDate = []
                 elif type(val) == type('str'):
                     self._eachRes.append(val)
-                    #print "append %s to _list" % self._eachRes
         
     def handle_endtag(self, tag):
         # pop stack
-        check = self.model["stack"][self.model["pos"]][2](tag)
-        if check:
-            #print "WRYYYYY %s" %tag
-            if type(check) == type(1):
-                self.model["pos"] -= check
-            else:
-                self.model["pos"] -= 1
+        self.model.prev(tag)
                 
     def handle_data(self, data):
-        handle = self.model["stack"][self.model["pos"]][3]
+        handle = self.model.getHandleData()
         if handle is not None:
             val = handle(data)
             if len(val):
-                """
-                if self._eachDate:
-                    self._eachDate.append("\n")
-                """
                 self._eachDate.append(val[0])
             
     def output(self):
@@ -142,3 +129,4 @@ def main(data):
     kparser = MyParser()
     return kparser.output()
 """
+

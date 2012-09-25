@@ -51,6 +51,8 @@ class model:
         try:
             #func = self.stack[self.pos].prevCond
             func = self.stack[self.pos][1]
+            if not func:
+                return
         except IndexError:
             pass
         else:
@@ -62,10 +64,12 @@ class model:
         try:
             #func = self.stack[self.pos].nextCond
             func = self.stack[self.pos][0]
+            if not func:
+                return
         except IndexError:
             pass
         else:
             check = func(*pargs)
             if check:
                 self.pos += int(check)
-    
+                

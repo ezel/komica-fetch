@@ -68,10 +68,6 @@ def test_model():
     assert m.getHandleData() == f4
     stack.append("\tmodel get handle test 2")
     
-    ms = model.setup()
-    type(ms[0]) == model.model
-    stack.append("\tmodel setup")
-    
 def test_fetch_page():
     validres = 633080
     validpic = "1348070226409.jpg"
