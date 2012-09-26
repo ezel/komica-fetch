@@ -3,20 +3,28 @@
 import fetch
 import filter_content
 import os
+import threading
 
 save_path ="./save"
 # check save path
 if not os.path.exists(save_path):
     os.mkdir(save_path)
     
-def save_from_fetch(*fetch_params):
-    data = (fetch.img(*fetch_params))
-    if data:
-        img = open("./save/" + fetch_params[0], "w")
-        try:
-            img.write(data)
-        finally:
-            img.close()
+class downloadThread(threading.Thread):
+    def __init__(self, name, type):
+        threading.Thread.__init__(self)
+        self.imgname = name
+        self.imgtype = type
+        
+    def run(self):
+        # def save_from_fetch(*fetch_params):
+        data = (fetch.img(self.imgname, self.imgtype))
+        if data:
+            img = open("./save/" + self.imgname, "w")
+            try:
+                img.write(data)
+            finally:
+                img.close()
     
 def main():
     # get html page
@@ -38,7 +46,8 @@ def main():
             #print post[1], post[2]
             # save src
             if save_src == 'y' or save_src == 'Y':
-                save_from_fetch(post[1], 1)
+                t = downloadThread(post[1], 1)
+                t.start()
             else:
                 """ A more UX way """
                 try:
@@ -59,7 +68,9 @@ def main():
                         # ask to save the source
                         print "Do you want to save the source?"
                         answer = raw_input('>')
-                        if answer == 'y' or answer == 'Y': save_from_fetch(post[1], 1)
+                        if answer == 'y' or answer == 'Y':
+                            t = downloadThread(post[1], 1)
+                            t.start()
                     else:
                         p.close()
                         
